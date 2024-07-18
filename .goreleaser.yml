@@ -27,10 +27,10 @@ builds:
       goarch: '386'
   binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
-- files:
-  - LICENSE
-  - data/*
-- format: zip
+  - format: zip
+  files:
+    - LICENSE
+    - data/*
   id: provider
   name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 checksum:
