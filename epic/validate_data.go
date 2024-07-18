@@ -28,7 +28,13 @@ type MediaTypeData struct {
 func getDataDirPath() string {
 	dataDir := os.Getenv("DATA_DIR") // Set to "../data" for go tests.
 	if dataDir == "" {
-		dataDir = "data" // Default is "data" because that is what is required for users consuming the provider.
+		// Get the directory of the current executable
+		executablePath, err := os.Executable()
+		if err != nil {
+			panic("unable to determine executable path: " + err.Error())
+		}
+		executableDir := filepath.Dir(executablePath)
+		dataDir = filepath.Join(executableDir, "data") // Default is "data" within the provider's directory.
 	}
 	return dataDir
 }
