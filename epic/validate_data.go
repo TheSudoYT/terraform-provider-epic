@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -31,10 +33,26 @@ func getDataDirPath() string {
 		// Get the directory of the current executable
 		executablePath, err := os.Executable()
 		if err != nil {
+			log.Printf("[ERROR] unable to determine executable path: %s", err)
 			panic("unable to determine executable path: " + err.Error())
 		}
+
+		// Determine the base directory of the provider
 		executableDir := filepath.Dir(executablePath)
-		dataDir = filepath.Join(executableDir, "data") // Default is "data" within the provider's directory.
+
+		// Navigate down to the data directory from the provider executable directory
+		var baseDir string
+		if runtime.GOOS == "windows" {
+			baseDir = filepath.Join(executableDir, "data")
+		} else {
+			baseDir = filepath.Join(executableDir, "data")
+		}
+
+		// Clean the constructed path
+		dataDir = filepath.Clean(baseDir)
+		log.Printf("[DEBUG] Data directory: %s", dataDir)
+	} else {
+		log.Printf("[DEBUG] Using DATA_DIR from environment variable: %s", dataDir)
 	}
 	return dataDir
 }
@@ -137,7 +155,7 @@ func customValidateMediaTypeAndTitle(ctx context.Context, diff *schema.ResourceD
 // Function to validate that the user provided media_type and title are valid or not.
 func isValidMediaTypeAndTitle(mediaType, title string) (bool, string) {
 	if !cacheLoaded {
-		if err := LoadAndCacheMediaTypes("data"); err != nil {
+		if err := LoadAndCacheMediaTypes(getDataDirPath()); err != nil {
 			return false, fmt.Sprintf("error loading media types: %v", err)
 		}
 	}
