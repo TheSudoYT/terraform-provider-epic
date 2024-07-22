@@ -44,6 +44,18 @@ func resourceRandomQuote() *schema.Resource {
 				Computed:    true,
 				Description: "The randomly generated quote.",
 			},
+			"lower": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "If false, the generated name will not contain lowercase letters.",
+			},
+			"upper": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "If false, the generated name will not contain uppercase letters.",
+			},
 		},
 		CustomizeDiff: customValidateMediaTypeAndTitle,
 	}
@@ -93,10 +105,15 @@ func resourceRandomQuoteCreate(d *schema.ResourceData, m interface{}) error {
 	localRand := rand.New(source)
 	selectedQuote := quotes[localRand.Intn(len(quotes))]
 
+	transformedSelection, err := transformSelection(d, selectedQuote)
+	if err != nil {
+		return err
+	}
+
 	// Set the resource ID and the computed quote.
 	d.SetId(strconv.FormatInt(time.Now().UnixNano(), 10))
 
-	if err := d.Set("quote", selectedQuote); err != nil {
+	if err := d.Set("quote", transformedSelection); err != nil {
 		log.Fatalf("Error setting quote: %v", err)
 	}
 

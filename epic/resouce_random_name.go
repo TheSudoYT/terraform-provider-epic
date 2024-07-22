@@ -44,6 +44,18 @@ func resourceRandomName() *schema.Resource {
 				Computed:    true,
 				Description: "The randomly generated name.",
 			},
+			"lower": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "If false, the generated name will not contain lowercase letters.",
+			},
+			"upper": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "If false, the generated name will not contain uppercase letters.",
+			},
 		},
 		CustomizeDiff: customValidateMediaTypeAndTitle,
 	}
@@ -93,10 +105,15 @@ func resourceRandomNameCreate(d *schema.ResourceData, m interface{}) error {
 	localRand := rand.New(source)
 	selectedName := names[localRand.Intn(len(names))]
 
+	transformedSelection, err := transformSelection(d, selectedName)
+	if err != nil {
+		return err
+	}
+
 	// Set the resource ID and the computed name.
 	d.SetId(strconv.FormatInt(time.Now().UnixNano(), 10))
 
-	if err := d.Set("name", selectedName); err != nil {
+	if err := d.Set("name", transformedSelection); err != nil {
 		log.Fatalf("Error setting name: %v", err)
 	}
 

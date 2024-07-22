@@ -31,6 +31,22 @@ func TestAccEpicRandomQuote_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccCheckEpicRandomQuoteConfig_lower(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("epic_random_quote.test_lower", "media_type", "movie"),
+					resource.TestCheckResourceAttr("epic_random_quote.test_lower", "title", "lord of the rings"),
+					resource.TestMatchResourceAttr("epic_random_quote.test_lower", "quote", regexp.MustCompile("^[a-z]+$")),
+				),
+			},
+			{
+				Config: testAccCheckEpicRandomQuoteConfig_upper(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("epic_random_quote.test_upper", "media_type", "movie"),
+					resource.TestCheckResourceAttr("epic_random_quote.test_upper", "title", "lord of the rings"),
+					resource.TestMatchResourceAttr("epic_random_quote.test_upper", "quote", regexp.MustCompile("^[A-Z]+$")),
+				),
+			},
+			{
 				Config:      testAccCheckEpicRandomQuoteConfig_invalidMediaType(),
 				ExpectError: regexp.MustCompile(`'not_a_real_media' is not a recognized media type`),
 			},
@@ -71,6 +87,32 @@ provider "epic" {}
 resource "epic_random_quote" "test_invalid_title" {
     media_type = "movie"
     title      = "fake_title"
+}
+`
+}
+
+func testAccCheckEpicRandomQuoteConfig_lower() string {
+	return `
+provider "epic" {}
+
+resource "epic_random_quote" "test_lower" {
+    media_type = "movie"
+    title      = "lord of the rings"
+    lower      = true
+    upper      = false
+}
+`
+}
+
+func testAccCheckEpicRandomQuoteConfig_upper() string {
+	return `
+provider "epic" {}
+
+resource "epic_random_quote" "test_upper" {
+    media_type = "movie"
+    title      = "lord of the rings"
+    lower      = false
+    upper      = true
 }
 `
 }

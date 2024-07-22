@@ -15,6 +15,8 @@ Generates a random quote based on the media type and title specified.
 resource "epic_random_quote" "got_quote" {
   media_type = "tv_series"
   title      = "game of thrones"
+  lower      = true
+  upper      = true
 }
 ```
 
@@ -25,6 +27,8 @@ resource "epic_random_quote" "got_quote" {
 
 - `media_type` (String) The type of media, e.g., 'movie' or 'tv_series'. Valid options are `anime` `movie` `tv_series` or `video_games`
 - `title` (String) The title of the media to base the quote generation on.
+- `lower` (bool) Deafults to `true`. Whether or not to include lower case characters.
+- `upper` (bool) Deafults to `true`. Whether or not to include upper case characters.
 
 ### Read-Only
 
